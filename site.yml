@@ -1,0 +1,121 @@
+---
+- name: Configure nginx server
+  hosts: webservers
+  become: yes
+
+  vars:
+    web_package: nginx
+    web_service: nginx
+    deploy_user: deploy
+    website_root: /var/www/html
+    server_name: localhost
+
+  tasks:
+    #User Management
+    - name: Create deployment user
+      user:
+        name: "{{ deploy_user }}"
+        shell: /bin/bash
+        create_home: yes
+        state: present
+      tags:
+        - user
+
+    #Package installation
+    - name: Upadate package cache
+      apt:
+        update_cache: yes
+      tags:
+        - install
+
+    - name: Package installation
+      apt:
+        name: "{{ web_package }}"
+        state: present
+      tags:
+        - install
+
+    #Directory Management
+    - name: Create website directory
+      file:
+        path: "{{ website_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+      tags:
+        - config
+
+    #Website Deployment
+    - name: Deploy website page
+      copy:
+        src: files/index.html
+        dest: "{{ website_root }}"
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      notify:
+        - restart nginx
+      tags:
+        - deploy
+
+    #Nginx Configuration
+    - name: Deploy nginx configuration
+      copy:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      notify:
+        - restart nginx
+      tags:
+        - config
+
+    #Service Management
+    - name: Start nginx service
+      service:
+        name: "{{ web_service }}"
+        state: started
+      tags:
+        - service
+
+    - name: Enable nginx service
+      service:
+        name: "{{ web_service }}"
+        enabled: yes
+      tags:
+        - service
+
+    #Service Verification
+    - name: Verify nginx is active
+      command: systemctl is-active nginx
+      register: nginx_status
+      changed_when: false
+      tags:
+        - verify
+
+    - name: Display nginx status
+      debug:
+        msg: "Nginx status is {{ nginx_status.stdout }}"
+      tags:
+        - verify
+
+  #Handlers
+  handlers:
+  - name: validate nginx config
+    command: nginx -t
+    changed_when: false
+    listen: restart nginx
+
+  - name: restart nginx
+    service:
+      name: nginx
+      state: restarted
+    listen: restart nginx
+
+
+
+
+
+

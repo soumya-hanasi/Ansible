@@ -1,0 +1,31 @@
+---
+- name: Install and configure Nginx
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Start nginx service
+      service:
+        name: nginx
+        state: started
+
+    - name: Enable nginx service
+      service: 
+        name: nginx
+        enabled: yes
+
+    - name: Copy webpage
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+
+    - name: Check nginx status
+      service:
+        name: nginx
+        state: started
