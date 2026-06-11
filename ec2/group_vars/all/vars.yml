@@ -1,0 +1,19 @@
+---
+ec2_instances:
+  - name: Ubuntu-server
+    image_id: ami-0a59248a6294cece2
+    instance_type: t3.micro
+
+  - name: AmazonLinux-server
+    image_id: ami-0e9310a659f5f62bf
+    instance_type: t3.micro
+
+  - name: RHEL-server
+    image_id: ami-07ffadc8f451992e7
+    instance_type: t3.micro
+
+aws_region: ap-southeast-2
+
+key_name: ansible
+security_group: sg-0b582153dfbebb00d
+subnet_id: subnet-04698ac4a83a3dc29

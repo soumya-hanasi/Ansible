@@ -1,0 +1,13 @@
+---
+- name: Stop EC2 instances
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  environment:
+    AWS_ACCESS_KEY: "{{ aws_access_key }}"
+    AWS_SECRET_KEY: "{{ aws_secret_key }}"
+
+  tasks:
+    - name: Include stop tasks
+      include_tasks: tasks/stop_instances.yml
